@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Upload - Acme Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: bold;
+            background-color: #E6E2DD;
+            color: #2c2c2c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            font-family: Georgia, serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #555;
+            background-color: #f9f9f9;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px;
+            font-family: Georgia, serif;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-primary {
+            background-color: #2c2c2c;
+            color: white;
+        }
+
+        .button-primary:hover:not(:disabled) {
+            background-color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-retry {
+            background-color: #d9534f;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .button-retry:hover {
+            background-color: #c9302c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 83, 79, 0.3);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .status-text {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .status-text.success {
+            color: #5cb85c;
+        }
+
+        .status-text.error {
+            color: #d9534f;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2c2c2c 0%, #4a4a4a 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .progress-percentage {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #666;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .processing {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h1>Product Upload</h1>
+                <p class="subtitle">Upload CSV file with product data (up to 500,000 records)</p>
+            </div>
+            <a href="/products" class="button button-primary"
+                style="width: auto; text-decoration: none; text-align: center;">Manage Products</a>
+        </div>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".csv" />
+            </div>
+            <div class="file-info" id="fileInfo"></div>
+            <button class="button button-primary" id="uploadButton" disabled>Upload Products</button>
+        </div>
+
+        <div class="progress-section" id="progressSection">
+            <div class="status-text" id="statusText">Preparing upload...</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">
+                    <span id="progressBarText">0%</span>
+                </div>
+            </div>
+            <div class="progress-percentage" id="progressPercentage">0% Complete</div>
+            <button class="button button-retry hidden" id="retryButton">Retry Upload</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+</body>
+
+</html>

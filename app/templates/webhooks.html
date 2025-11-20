@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Management - Acme Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: bold;
+            background-color: #E6E2DD;
+            color: #2c2c2c;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #1a1a1a;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-family: Georgia, serif;
+            font-weight: bold;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button-primary {
+            background-color: #2c2c2c;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-danger {
+            background-color: #d9534f;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background-color: #c9302c;
+        }
+
+        .button-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .button-success {
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .button-success:hover {
+            background-color: #4cae4c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: Georgia, serif;
+            font-weight: bold;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider {
+            background-color: #5cb85c;
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .status-enabled {
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .status-disabled {
+            background-color: #999;
+            color: white;
+        }
+
+        .test-result {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .test-result.success {
+            color: #5cb85c;
+        }
+
+        .test-result.error {
+            color: #d9534f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .toast {
+            background-color: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .toast.success {
+            border-left: 5px solid #5cb85c;
+        }
+
+        .toast.error {
+            border-left: 5px solid #d9534f;
+        }
+
+        .toast.info {
+            border-left: 5px solid #5bc0de;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .event-types {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .progress-bar-cell {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #5bc0de;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.completed {
+            background: #5cb85c;
+        }
+
+        .progress-fill.failed {
+            background: #d9534f;
+        }
+
+        .upload-status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .upload-status-success {
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .upload-status-failure {
+            background-color: #d9534f;
+            color: white;
+        }
+
+        .upload-status-progress {
+            background-color: #5bc0de;
+            color: white;
+        }
+
+        .upload-status-pending {
+            background-color: #f0ad4e;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Webhook Management</h1>
+
+        <div class="controls">
+            <div>
+                <a href="/products" class="button button-primary"
+                    style="text-decoration: none; display: inline-block;">Products</a>
+                <a href="/" class="button button-primary" style="text-decoration: none; display: inline-block;">Upload
+                    CSV</a>
+            </div>
+        </div>
+
+        <table id="webhookTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>Event Types</th>
+                    <th>Status</th>
+                    <th>Last Test</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="webhookTableBody">
+                <tr class="empty-state">
+                    <td colspan="6">Loading webhooks...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 style="font-size: 24px; margin-top: 40px; margin-bottom: 20px;">Upload History</h2>
+
+        <table id="uploadHistoryTable">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Imported</th>
+                    <th>Errors</th>
+                    <th>Started</th>
+                    <th>Completed</th>
+                </tr>
+            </thead>
+            <tbody id="uploadHistoryBody">
+                <tr class="empty-state">
+                    <td colspan="7">Loading upload history...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="webhookModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Create Webhook</div>
+            <form id="webhookForm">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="webhookName" required>
+                </div>
+                <div class="form-group">
+                    <label>URL *</label>
+                    <input type="url" id="webhookUrl" required placeholder="https://example.com/webhook">
+                </div>
+                <div class="form-group">
+                    <label>Event Types *</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eventUploadCompleted" value="upload.completed">
+                            <label for="eventUploadCompleted">Upload Completed</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eventUploadFailed" value="upload.failed">
+                            <label for="eventUploadFailed">Upload Failed</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eventProductCreated" value="product.created">
+                            <label for="eventProductCreated">Product Created</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eventProductUpdated" value="product.updated">
+                            <label for="eventProductUpdated">Product Updated</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="eventProductDeleted" value="product.deleted">
+                            <label for="eventProductDeleted">Product Deleted</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Enabled</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="webhookEnabled" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="button button-primary">Save</button>
+                    <button type="button" class="button" onclick="webhookManager.closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/webhook.js') }}"></script>
+</body>
+
+</html>
