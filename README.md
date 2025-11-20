@@ -86,3 +86,6 @@ See `.env.example` for configuration options.
 - Bulk delete functionality
 - Async processing with Celery
 - Docker deployment ready
+
+
+# Link to deployed website: https://acme-crimson-smoke-3946.fly.dev
